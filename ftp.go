@@ -12,6 +12,7 @@ import (
 	"io"
 	"net"
 	"net/textproto"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -1175,7 +1176,10 @@ func (r *Response) Close() error {
 	var errs []error
 
 	if err := r.conn.Close(); err != nil {
-		errs = append(errs, err)
+		// see https://github.com/golang/go/issues/19229
+		if runtime.GOOS != "freebsd" {
+			errs = append(errs, err)
+		}
 	}
 
 	if err := r.c.checkDataShut(); err != nil {
